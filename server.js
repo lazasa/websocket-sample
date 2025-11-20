@@ -35,16 +35,15 @@ server.on("upgrade", (req, socket) => {
   socket.on("data", (buffer) => {
     // Very minimal frame parsing (text frame only)
     const opcode = buffer[0] & 0x0f;
-    const isMasked = buffer[1] & 0x80;
-    const payloadLength = buffer[1] & 0x7f;
-
     if (opcode === 0x8) {
       socket.end(); // client sent close frame
       return;
     }
 
+    const isMasked = buffer[1] & 0x80;
     if (!isMasked) return; // all client frames must be masked
 
+    const payloadLength = buffer[1] & 0x7f;
     const mask = buffer.slice(2, 6);
     const payload = buffer.slice(6, 6 + payloadLength);
 
